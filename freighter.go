@@ -58,6 +58,7 @@ func main() {
 	jsonFile := flag.String("file", "", "JSON file containing job definition")
 	username := flag.String("username", "aurora", "Username to use for authorization")
 	password := flag.String("password", "secret", "Password to use for authorization")
+	hostLimit := flag.String("hostLimit", "", "Limit jobs to only run on this host.")
 	flag.Parse()
 
 	if *jsonFile == "" {
@@ -121,6 +122,10 @@ func main() {
 			IsService(false).
 			InstanceCount(jsonJob[0].INSTANCES).
 			AddPorts(1)
+
+		if *hostLimit != "" {
+			auroraJob.AddValueConstraint("host", false, *hostLimit)
+		}
 
 		fmt.Println("Creating docker based job : ", job.NAME)
 		container := realis.NewDockerContainer().Image(job.IMAGE).AddParameter("network", "host")
